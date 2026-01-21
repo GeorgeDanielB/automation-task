@@ -1,0 +1,15 @@
+[project]
+name = "qa-automation-framework"
+version = "1.0.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["-v", "--tb=short"]
+markers = [
+    "smoke: Quick sanity tests",
+    "regression: Full regression suite",
+]
