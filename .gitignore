@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Test artifacts
+reports/
+screenshots/
+*.log
+
+# Playwright
+playwright-report/
+test-results/
+
+# macOS
+.DS_Store
+
+# Environment
+.env
