@@ -33,6 +33,12 @@ class CartPage(BasePage):
     CONTINUE_SHOPPING_BUTTON = "#continue-shopping"
     CHECKOUT_BUTTON = "#checkout"
 
+    # Helpers
+
+    @staticmethod
+    def _to_button_id(item_name: str) -> str:
+        return item_name.lower().replace(" ", "-").replace("(", "").replace(")", "")
+
     # Navigation
 
     @allure.step("Continue shopping")
@@ -52,7 +58,7 @@ class CartPage(BasePage):
     def remove_item(self, item_name: str) -> None:
         """Remove an item from the cart by name."""
         logger.info(f"Removing item from cart: {item_name}")
-        button_id = item_name.lower().replace(" ", "-")
+        button_id = self._to_button_id(item_name)
         self.click(f"#remove-{button_id}")
 
     # Getters

@@ -46,6 +46,12 @@ class InventoryPage(BasePage):
     ITEM_PRICE = ".inventory_item_price"
     ADD_TO_CART_BUTTON = "button[id^='add-to-cart']"
 
+    # Helpers
+
+    @staticmethod
+    def _to_button_id(product_name: str) -> str:
+        return product_name.lower().replace(" ", "-").replace("(", "").replace(")", "")
+
     # Navigation
 
     @allure.step("Open menu")
@@ -92,14 +98,14 @@ class InventoryPage(BasePage):
     def add_product_to_cart(self, product_name: str) -> None:
         """Add a product to the cart by name."""
         logger.info(f"Adding to cart: {product_name}")
-        button_id = product_name.lower().replace(" ", "-")
-        self.click(f"#add-to-cart-{button_id}")
+        button_id = self._to_button_id(item_name)
+        self.click(f"#remove-{button_id}")
 
     @allure.step("Remove product from cart: {product_name}")
     def remove_product_from_cart(self, product_name: str) -> None:
         """Remove a product from the cart by name."""
         logger.info(f"Removing from cart: {product_name}")
-        button_id = product_name.lower().replace(" ", "-")
+        button_id = self._to_button_id(item_name)
         self.click(f"#remove-{button_id}")
 
     @allure.step("Add product by index: {index}")
@@ -169,8 +175,8 @@ class InventoryPage(BasePage):
 
     def is_product_in_cart(self, product_name: str) -> bool:
         """Check if a product has been added to the cart."""
-        button_id = product_name.lower().replace(" ", "-")
-        return self.is_visible(f"#remove-{button_id}")
+        button_id = self._to_button_id(item_name)
+        self.click(f"#remove-{button_id}")
 
     def is_menu_open(self) -> bool:
         """Check if the hamburger menu is open."""
