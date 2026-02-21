@@ -1,10 +1,11 @@
 [project]
 name = "qa-automation-framework"
-version = "1.0.0"
+version = "1.1.0"
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

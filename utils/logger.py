@@ -1,15 +1,15 @@
-"""
-Logging Configuration Module.
-
-Provides centralized logging setup for the framework.
-"""
+"""Logging Configuration Module."""
 
 import logging
 import sys
+import threading
+
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+_setup_lock = threading.Lock()
+_is_setup = False
 
 class TestContextFilter(logging.Filter):
     """Filter that adds test context to log records."""
@@ -29,51 +29,50 @@ class TestContextFilter(logging.Filter):
 
 def setup_logging(level: str = "INFO") -> logging.Logger:
     """Set up logging for the framework."""
-    logger = logging.getLogger("qa_framework")
-    logger.setLevel(getattr(logging, level.upper()))
+    global _is_setup
 
-    # Clear existing handlers
-    if logger.hasHandlers():
-        for handler in logger.handlers:
-            handler.close()
-        logger.handlers.clear()
+    with _setup_lock:
+        if _is_setup:
+            return logging.getLogger("qa_framework")
 
-    # Add test context filter
-    context_filter = TestContextFilter()
+        logger = logging.getLogger("qa_framework")
+        logger.setLevel(getattr(logging, level.upper()))
 
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.DEBUG)
-    console_handler.addFilter(context_filter)
+        context_filter = TestContextFilter()
 
-    console_format = "%(asctime)s [%(levelname)-8s] %(name)s: %(message)s"
-    console_handler.setFormatter(logging.Formatter(console_format, "%H:%M:%S"))
+        # Console handler
 
-    logger.addHandler(console_handler)
+        console = logging.StreamHandler(sys.stdout)
+        console.setLevel(logging.DEBUG)
+        console.addFilter(context_filter)
+        console.setFormatter(logging.Formatter(
+            "%(asctime)s [%(levelname)-8s] %(name)s: %(message)s", "%H:%M:%S",
+        ))
+        logger.addHandler(console)
 
-    # File handler
-    log_dir = Path("reports")
-    log_dir.mkdir(parents=True, exist_ok=True)
+        # File handler
 
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    log_file = log_dir / f"test_run_{date_str}.log"
+        log_dir = Path("reports")
+        log_dir.mkdir(parents=True, exist_ok=True)
 
-    file_handler = logging.FileHandler(log_file, encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.addFilter(context_filter)
+        log_file = log_dir / f"test_run_{datetime.now():%Y-%m-%d}.log"
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.addFilter(context_filter)
+        file_handler.setFormatter(logging.Formatter(
+            "%(asctime)s [%(levelname)-8s] [%(test_name)s] %(name)s: %(message)s",
+            "%Y-%m-%d %H:%M:%S",
+        ))
+        logger.addHandler(file_handler)
 
-    file_format = "%(asctime)s [%(levelname)-8s] [%(test_name)s] %(name)s: %(message)s"
-    file_handler.setFormatter(logging.Formatter(file_format, "%Y-%m-%d %H:%M:%S"))
-
-    logger.addHandler(file_handler)
-
-    return logger
+        _is_setup = True
+        return logger
 
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance for a module."""
-    root_logger = logging.getLogger("qa_framework")
-    if not root_logger.handlers:
+    root = logging.getLogger("qa_framework")
+    if not root.handlers:
         setup_logging()
 
     return logging.getLogger(f"qa_framework.{name}")
