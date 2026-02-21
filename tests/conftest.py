@@ -173,7 +173,7 @@ def inventory_page(page: Page, test_data: dict) -> InventoryPage:
     login.login(creds["users"]["standard"], creds["password"])
 
     inventory = InventoryPage(page)
-    inventory.wait_for_load_state("networkidle")
+    inventory.wait_for_load()
     return inventory
 
 

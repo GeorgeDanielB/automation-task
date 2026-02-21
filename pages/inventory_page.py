@@ -28,7 +28,6 @@ class ProductInfo:
 
 class InventoryPage(BasePage):
     URL_PATH = "/inventory.html"
-    PAGE_TITLE = "Swag Labs"
 
     # Locators
     APP_LOGO = ".app_logo"

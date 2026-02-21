@@ -22,7 +22,6 @@ class CartItem:
 
 class CartPage(BasePage):
     URL_PATH = "/cart.html"
-    PAGE_TITLE = "Swag Labs"
 
     # Locators
     CART_LIST = ".cart_list"

@@ -21,7 +21,6 @@ class OrderSummary:
 
 class CheckoutPage(BasePage):
     URL_PATH = "/checkout-step-one.html"
-    PAGE_TITLE = "Swag Labs"
 
     # Locators - Step One
     FIRST_NAME_INPUT = "#first-name"

@@ -83,6 +83,5 @@ class BasePage:
 
     # Waits
 
-    def wait_for_load_state(self, state: str = "networkidle") -> None:
-        """Wait for page to reach a specific load state."""
+    def wait_for_load(self, state: str = "domcontentloaded") -> None:
         self._page.wait_for_load_state(state)

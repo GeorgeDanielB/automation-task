@@ -10,7 +10,6 @@ logger = get_logger(__name__)
 
 class LoginPage(BasePage):
     URL_PATH = ""
-    PAGE_TITLE = "Swag Labs"
 
     # Locators
     USERNAME_INPUT = "#user-name"
