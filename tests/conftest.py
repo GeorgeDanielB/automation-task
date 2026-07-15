@@ -1,19 +1,19 @@
 """Pytest Configuration and Fixtures."""
 
 import os
+from collections.abc import Generator
 from datetime import datetime
 from pathlib import Path
-from typing import Generator
 
 import allure
 import pytest
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
 
 from config.settings import BrowserType, Settings, get_settings
-from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
+from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
 from utils.file_handler import FileHandler
 from utils.logger import TestContextFilter, get_logger, setup_logging
 
@@ -23,8 +23,14 @@ logger = get_logger(__name__)
 # Command Line Options
 
 def pytest_addoption(parser):
+    parser.addoption(
+        "--browser",
+        default="chromium",
+        choices=[browser.value for browser in BrowserType],
+        help="Browser to run tests against",
+    )
     parser.addoption("--headless", default="true", choices=["true", "false"])
-    parser.addoption("--slow-mo", default="0")
+    parser.addoption("--slow-mo", default="0", help="Delay between actions in ms")
 
 
 # Pytest Hooks
@@ -72,10 +78,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session")
 def settings(request) -> Settings:
-    browser = request.config.getoption("--browser", default="chromium")
-    if isinstance(browser, list):
-        browser = browser[0] if browser else "chromium"
-
+    browser = request.config.getoption("--browser")
     headless = request.config.getoption("--headless") == "true"
     slow_mo = int(request.config.getoption("--slow-mo"))
 
@@ -133,7 +136,7 @@ def page(context: BrowserContext) -> Generator[Page, None, None]:
 
 # Data Fixtures
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def test_data() -> dict:
     data_file = Path("data/test_data.yaml")
     if data_file.exists():
@@ -141,17 +144,17 @@ def test_data() -> dict:
     return {}
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def credentials(test_data: dict) -> dict:
     return test_data.get("credentials", {})
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def products(test_data: dict) -> dict:
     return test_data.get("products", {})
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def checkout_data(test_data: dict) -> dict:
     return test_data.get("checkout", {})
 

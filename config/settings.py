@@ -1,13 +1,13 @@
 """Configuration management."""
 
-from enum import Enum
+from enum import StrEnum
 from functools import lru_cache
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class BrowserType(str, Enum):
+class BrowserType(StrEnum):
     """Supported browser types."""
     CHROMIUM = "chromium"
     FIREFOX = "firefox"

@@ -3,8 +3,8 @@
 import allure
 import pytest
 
-from pages.login_page import LoginPage
 from pages.inventory_page import InventoryPage
+from pages.login_page import LoginPage
 
 
 @allure.epic("Authentication")

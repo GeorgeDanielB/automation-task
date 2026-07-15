@@ -1,7 +1,6 @@
 """Page Object for the Checkout pages."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 import allure
 
@@ -67,7 +66,7 @@ class CheckoutPage(BasePage):
         logger.info("Finishing checkout")
         self.click(self.FINISH_BUTTON)
 
-    def get_order_summary(self) -> Optional[OrderSummary]:
+    def get_order_summary(self) -> OrderSummary | None:
         """Get the order summary information."""
         if not self.is_visible(self.SUMMARY_INFO):
             return None

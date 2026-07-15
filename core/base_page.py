@@ -1,6 +1,5 @@
 """Base Page Module."""
 
-from typing import List
 
 from playwright.sync_api import Page
 
@@ -69,11 +68,11 @@ class BasePage:
         """Wait for element to be hidden."""
         self._element_handler.wait_for_hidden(selector, **kwargs)
 
-    def select_option(self, selector: str, **kwargs) -> List[str]:
+    def select_option(self, selector: str, **kwargs) -> list[str]:
         """Select option from dropdown."""
         return self._element_handler.select_option(selector, **kwargs)
 
-    def get_all_texts(self, selector: str) -> List[str]:
+    def get_all_texts(self, selector: str) -> list[str]:
         """Get text from all matching elements."""
         return self._element_handler.get_all_texts(selector)
 

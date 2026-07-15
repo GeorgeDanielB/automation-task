@@ -7,9 +7,9 @@ Comprehensive tests for the checkout flow on SauceDemo.
 import allure
 import pytest
 
-from pages.inventory_page import InventoryPage
 from pages.cart_page import CartPage
 from pages.checkout_page import CheckoutPage
+from pages.inventory_page import InventoryPage
 
 
 @allure.epic("Checkout")

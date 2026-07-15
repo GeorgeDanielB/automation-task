@@ -7,10 +7,11 @@ enhanced error handling, logging, and screenshot capture on failure.
 
 import functools
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List, Optional
 
-from playwright.sync_api import Locator, Page, TimeoutError as PlaywrightTimeout
+from playwright.sync_api import Locator, Page
+from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 from utils.logger import get_logger
 
@@ -67,7 +68,7 @@ class ElementHandler:
         self,
         selector: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         force: bool = False,
         click_count: int = 1,
     ) -> None:
@@ -83,7 +84,7 @@ class ElementHandler:
         selector: str,
         value: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         clear_first: bool = True,
     ) -> None:
         """Fill an input field with text."""
@@ -95,7 +96,7 @@ class ElementHandler:
         locator.fill(value, timeout=timeout)
 
     @_with_error_handling("get_text")
-    def get_text(self, selector: str, *, timeout: Optional[float] = None) -> str:
+    def get_text(self, selector: str, *, timeout: float | None = None) -> str:
         """Get text content of an element."""
         text = self._get_locator(selector).text_content(timeout=timeout) or ""
         display = text[:50] + "..." if len(text) > 50 else text
@@ -108,24 +109,24 @@ class ElementHandler:
         selector: str,
         attribute: str,
         *,
-        timeout: Optional[float] = None,
-    ) -> Optional[str]:
+        timeout: float | None = None,
+    ) -> str | None:
         """Get an attribute value from an element."""
         logger.debug(f"Getting '{attribute}' from '{selector}'")
         return self._get_locator(selector).get_attribute(attribute, timeout=timeout)
 
     @_with_error_handling("get_input_value")
-    def get_input_value(self, selector: str, *, timeout: Optional[float] = None) -> str:
+    def get_input_value(self, selector: str, *, timeout: float | None = None) -> str:
         """Get the value of an input field."""
         return self._get_locator(selector).input_value(timeout=timeout)
 
-    def is_visible(self, selector: str, *, timeout: Optional[float] = None) -> bool:
-        """Check if an element is visible."""
-        return self._get_locator(selector).is_visible(timeout=timeout)
+    def is_visible(self, selector: str) -> bool:
+        """Check if an element is visible (immediate, non-waiting check)."""
+        return self._get_locator(selector).is_visible()
 
-    def is_enabled(self, selector: str, *, timeout: Optional[float] = None) -> bool:
-        """Check if an element is enabled."""
-        return self._get_locator(selector).is_enabled(timeout=timeout)
+    def is_enabled(self, selector: str) -> bool:
+        """Check if an element is enabled (immediate, non-waiting check)."""
+        return self._get_locator(selector).is_enabled()
 
     # Waits
 
@@ -133,7 +134,7 @@ class ElementHandler:
         self,
         selector: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> Locator:
         """Wait for an element to be visible."""
         logger.debug(f"Waiting for '{selector}' to be visible")
@@ -145,7 +146,7 @@ class ElementHandler:
         self,
         selector: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> None:
         """Wait for an element to be hidden."""
         logger.debug(f"Waiting for '{selector}' to be hidden")
@@ -156,12 +157,12 @@ class ElementHandler:
     def select_option(
         self,
         selector: str,
-        value: Optional[str] = None,
+        value: str | None = None,
         *,
-        label: Optional[str] = None,
-        index: Optional[int] = None,
-        timeout: Optional[float] = None,
-    ) -> List[str]:
+        label: str | None = None,
+        index: int | None = None,
+        timeout: float | None = None,
+    ) -> list[str]:
         """Select option(s) from a dropdown."""
         logger.debug(f"Selecting option in '{selector}'")
         locator = self._get_locator(selector)
@@ -174,7 +175,7 @@ class ElementHandler:
             return locator.select_option(index=index, timeout=timeout)
         raise ValueError("Must provide value, label, or index")
 
-    def get_all_texts(self, selector: str) -> List[str]:
+    def get_all_texts(self, selector: str) -> list[str]:
         """Get text content from all matching elements."""
         return self._get_locator(selector).all_text_contents()
 

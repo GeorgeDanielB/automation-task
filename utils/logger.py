@@ -3,10 +3,8 @@
 import logging
 import sys
 import threading
-
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 _setup_lock = threading.Lock()
 _is_setup = False
@@ -14,10 +12,10 @@ _is_setup = False
 class TestContextFilter(logging.Filter):
     """Filter that adds test context to log records."""
 
-    _current_test: Optional[str] = None
+    _current_test: str | None = None
 
     @classmethod
-    def set_current_test(cls, test_name: Optional[str]) -> None:
+    def set_current_test(cls, test_name: str | None) -> None:
         """Set the current test name."""
         cls._current_test = test_name
 

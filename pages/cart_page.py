@@ -1,11 +1,11 @@
 """Page Object for the Shopping Cart page."""
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 import allure
 
 from core.base_page import BasePage
+from pages.common import remove_from_cart_selector
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -33,12 +33,6 @@ class CartPage(BasePage):
     CONTINUE_SHOPPING_BUTTON = "#continue-shopping"
     CHECKOUT_BUTTON = "#checkout"
 
-    # Helpers
-
-    @staticmethod
-    def _to_button_id(item_name: str) -> str:
-        return item_name.lower().replace(" ", "-").replace("(", "").replace(")", "")
-
     # Navigation
 
     @allure.step("Continue shopping")
@@ -58,8 +52,7 @@ class CartPage(BasePage):
     def remove_item(self, item_name: str) -> None:
         """Remove an item from the cart by name."""
         logger.info(f"Removing item from cart: {item_name}")
-        button_id = self._to_button_id(item_name)
-        self.click(f"#remove-{button_id}")
+        self.click(remove_from_cart_selector(item_name))
 
     # Getters
 
@@ -67,16 +60,16 @@ class CartPage(BasePage):
         """Get the number of items in the cart."""
         return self.count(self.CART_ITEM)
 
-    def get_item_names(self) -> List[str]:
+    def get_item_names(self) -> list[str]:
         """Get names of all items in the cart."""
         return self.get_all_texts(self.ITEM_NAME)
 
-    def get_item_prices(self) -> List[float]:
+    def get_item_prices(self) -> list[float]:
         """Get prices of all items in the cart."""
         price_texts = self.get_all_texts(self.ITEM_PRICE)
         return [float(price.replace("$", "")) for price in price_texts]
 
-    def get_cart_item(self, item_name: str) -> Optional[CartItem]:
+    def get_cart_item(self, item_name: str) -> CartItem | None:
         """Get details of a specific cart item."""
         item_locator = f".cart_item:has-text('{item_name}')"
 

@@ -1,18 +1,18 @@
 """Page Object for the Inventory/Products page."""
 
 from dataclasses import dataclass
-from enum import Enum
-from typing import List, Optional
+from enum import StrEnum
 
 import allure
 
 from core.base_page import BasePage
+from pages.common import add_to_cart_selector, remove_from_cart_selector
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-class SortOrder(str, Enum):
+class SortOrder(StrEnum):
     """Product sort options."""
     NAME_ASC = "az"
     NAME_DESC = "za"
@@ -45,12 +45,6 @@ class InventoryPage(BasePage):
     ITEM_DESC = ".inventory_item_desc"
     ITEM_PRICE = ".inventory_item_price"
     ADD_TO_CART_BUTTON = "button[id^='add-to-cart']"
-
-    # Helpers
-
-    @staticmethod
-    def _to_button_id(product_name: str) -> str:
-        return product_name.lower().replace(" ", "-").replace("(", "").replace(")", "")
 
     # Navigation
 
@@ -98,15 +92,13 @@ class InventoryPage(BasePage):
     def add_product_to_cart(self, product_name: str) -> None:
         """Add a product to the cart by name."""
         logger.info(f"Adding to cart: {product_name}")
-        button_id = self._to_button_id(product_name)
-        self.click(f"#add-to-cart-{button_id}")
+        self.click(add_to_cart_selector(product_name))
 
     @allure.step("Remove product from cart: {product_name}")
     def remove_product_from_cart(self, product_name: str) -> None:
         """Remove a product from the cart by name."""
         logger.info(f"Removing from cart: {product_name}")
-        button_id = self._to_button_id(product_name)
-        self.click(f"#remove-{button_id}")
+        self.click(remove_from_cart_selector(product_name))
 
     @allure.step("Add product by index: {index}")
     def add_product_by_index(self, index: int) -> None:
@@ -128,23 +120,23 @@ class InventoryPage(BasePage):
         """Get the number of products displayed."""
         return self.count(self.INVENTORY_ITEM)
 
-    def get_product_names(self) -> List[str]:
+    def get_product_names(self) -> list[str]:
         """Get names of all displayed products."""
         return self.get_all_texts(self.ITEM_NAME)
 
-    def get_product_prices(self) -> List[float]:
+    def get_product_prices(self) -> list[float]:
         """Get prices of all displayed products."""
         price_texts = self.get_all_texts(self.ITEM_PRICE)
         return [float(price.replace("$", "")) for price in price_texts]
 
-    def get_product_info(self, product_name: str) -> Optional[ProductInfo]:
+    def get_product_info(self, product_name: str) -> ProductInfo | None:
         """Get detailed information about a specific product."""
         product_locator = f".inventory_item:has-text('{product_name}')"
-        
+
         if not self.is_visible(product_locator):
             logger.warning(f"Product not found: {product_name}")
             return None
-        
+
         item = self.page.locator(product_locator)
         name = item.locator(self.ITEM_NAME).text_content()
         description = item.locator(self.ITEM_DESC).text_content()
@@ -153,13 +145,15 @@ class InventoryPage(BasePage):
 
         return ProductInfo(name=name, description=description, price=price)
 
-    def get_all_products(self) -> List[ProductInfo]:
+    def get_all_products(self) -> list[ProductInfo]:
         """Get information about all displayed products."""
         products = []
-        for name in self.get_product_names():
-            info = self.get_product_info(name)
-            if info:
-                products.append(info)
+        for item in self.page.locator(self.INVENTORY_ITEM).all():
+            products.append(ProductInfo(
+                name=item.locator(self.ITEM_NAME).text_content() or "",
+                description=item.locator(self.ITEM_DESC).text_content() or "",
+                price=float((item.locator(self.ITEM_PRICE).text_content() or "0").replace("$", "")),
+            ))
         return products
 
     # Validations
@@ -175,8 +169,7 @@ class InventoryPage(BasePage):
 
     def is_product_in_cart(self, product_name: str) -> bool:
         """Check if a product has been added to the cart."""
-        button_id = self._to_button_id(product_name)
-        return self.is_visible(f"#remove-{button_id}")
+        return self.is_visible(remove_from_cart_selector(product_name))
 
     def is_menu_open(self) -> bool:
         """Check if the hamburger menu is open."""

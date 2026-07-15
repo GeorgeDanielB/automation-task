@@ -7,8 +7,8 @@ Comprehensive tests for the product catalog functionality on SauceDemo.
 import allure
 import pytest
 
-from pages.inventory_page import InventoryPage, SortOrder
 from pages.cart_page import CartPage
+from pages.inventory_page import InventoryPage, SortOrder
 
 
 @allure.epic("Product Catalog")
